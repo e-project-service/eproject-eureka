@@ -1,0 +1,96 @@
+
+
+---
+
+debug: true
+
+spring:
+  profiles: dev
+
+eproject:
+  admin:
+    domain: admin.eproject.local:2333
+
+logging:
+  level:
+    ROOT: DEBUG
+
+
+---
+
+spring:
+  profiles: test
+
+eproject:
+  admin:
+    domain: admin.eproject.com:2333
+
+logging:
+  level:
+    ROOT: INFO
+
+
+---
+
+spring:
+  profiles: prod
+
+eproject:
+  admin:
+    domain: admin.eproject.com:2333
+
+logging:
+  level:
+    ROOT: ERROR
+
+
+---
+
+spring:
+  profiles: docker
+
+eproject:
+  admin:
+    domain: eproject-admin:2333
+
+logging:
+  level:
+    ROOT: ERROR
+
+
+---
+
+server:
+  port: 2337
+  servlet:
+    context-path: /eureka-service
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: '*'
+
+spring:
+  application:
+    name: eProject-Eureka
+  boot:
+    admin:
+      client:
+        url: http://${eproject.admin.domain}/admin-service
+
+eureka:
+  instance:
+    virtual-host-name: eureka.eproject.com
+  server:
+    wait-time-in-ms-when-sync-empty: 0
+  client:
+    register-with-eureka: true
+    fetch-registry: true
+    serviceUrl:
+      defaultZone: http://localhost:${server.port}/${server.servlet.context-path}/eureka
+
+logging:
+  level:
+    ROOT: ERROR
+

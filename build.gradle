@@ -1,0 +1,140 @@
+buildscript {
+    ext {
+        springCloudVersion = 'Hoxton.SR10'
+        springBootVersion = '2.3.0.RELEASE'
+        springVersion = '5.2.6.RELEASE'
+        springBootAdminVersion = '2.3.0'
+    }
+    repositories {
+        maven { url 'https://plugins.gradle.org/m2/' }
+        mavenCentral()
+        maven { url 'https://repo.spring.io/plugins-release' }
+    }
+    dependencies {
+        classpath "org.springframework.boot:spring-boot-gradle-plugin:${springBootVersion}"
+        classpath 'io.spring.gradle:dependency-management-plugin:1.0.6.RELEASE'
+        classpath 'io.spring.gradle:propdeps-plugin:0.0.10.RELEASE'
+        classpath 'com.github.ksoichiro:gradle-build-info-plugin:0.2.0'
+        classpath 'net.researchgate:gradle-release:2.6.0'
+        classpath 'com.bmuschko:gradle-docker-plugin:6.6.1'
+    }
+}
+
+allprojects {
+    apply plugin: 'java'
+    apply plugin: 'idea'
+
+    sourceCompatibility = 1.8
+    targetCompatibility = 1.8
+
+    repositories {
+        mavenLocal()
+        mavenCentral()
+        jcenter()
+        maven {
+            url 'https://jitpack.io'
+        }
+        flatDir {
+            dirs "$rootProject.projectDir/libs"
+        }
+    }
+
+    tasks.withType(JavaCompile) {
+        options.encoding = "UTF-8"
+    }
+
+    configurations.all {
+        resolutionStrategy.cacheChangingModulesFor  0,'seconds'
+    }
+}
+
+project(':eproject-eureka-boot') {
+
+    apply plugin: 'java'
+    apply plugin: 'maven'
+    apply plugin: 'org.springframework.boot'
+    apply plugin: "io.spring.dependency-management"
+    apply plugin: 'com.github.ksoichiro.build.info'
+    apply plugin: 'net.researchgate.release'
+    apply plugin: 'com.bmuschko.docker-spring-boot-application'
+
+    apply from: "${serviceTemplateGit}/gradle/services.gradle"
+
+    group 'com.github.xiaoyao9184.eproject'
+    version "${version}"
+    description "Eureka in spring boot"
+
+
+    dependencyManagement {
+        imports {
+            mavenBom "org.springframework.cloud:spring-cloud-dependencies:${springCloudVersion}"
+        }
+    }
+
+    dependencies {
+
+        //Cloud
+        implementation 'org.springframework.cloud:spring-cloud-starter-netflix-eureka-server'
+
+        //Boot
+        runtimeOnly 'org.springframework.boot:spring-boot-devtools'
+
+        //BootAdmin
+        implementation "de.codecentric:spring-boot-admin-starter-client:${springBootAdminVersion}"
+
+        //Jolokia
+        implementation 'org.jolokia:jolokia-core'
+
+        //TEST
+        testImplementation group: 'junit', name: 'junit', version: '4.11'
+    }
+
+    springBoot {
+        buildInfo()
+    }
+
+    buildInfo {
+        committerDateFormat 'yyyy-MM-dd HH:mm:ss Z'
+        buildDateFormat 'yyyy-MM-dd HH:mm:ss Z'
+        manifestEnabled true
+        gitPropertiesEnabled true
+        gitInfoMode com.github.ksoichiro.build.info.BuildInfoExtension.MODE_DEFAULT
+        warnIfGitDirectoryIsMissing false
+        attributeGitBranchEnabled true
+        attributeGitCommitEnabled true
+        attributeGitCommitterDateEnabled true
+        attributeBuildDateEnabled true
+        attributeBuildJavaVersionEnabled true
+        attributeBuildJavaVendorEnabled true
+        attributeBuildOsNameEnabled true
+        attributeBuildOsVersionEnabled true
+    }
+
+    release {
+        failOnCommitNeeded = true
+        failOnPublishNeeded = true
+        failOnSnapshotDependencies = false
+        failOnUnversionedFiles = false
+        failOnUpdateNeeded = true
+        revertOnFail = true
+        preCommitText = ''
+        preTagCommitMessage = '[Gradle Release Plugin] - pre tag: '
+        tagCommitMessage = '[Gradle Release Plugin] - tag: '
+        newVersionCommitMessage = '[Gradle Release Plugin] - new version: '
+        tagTemplate = '${version}'
+        versionPropertyFile = "${rootProject.projectDir}/gradle.properties"
+        versionProperties = []
+        buildTasks = ['bootJar']
+        scmAdapters = [
+                net.researchgate.release.GitAdapter
+        ]
+
+        git {
+            requireBranch = 'master'
+            pushToRemote = 'origin'
+            pushToBranchPrefix = ''
+            commitVersionFileOnly = false
+        }
+    }
+
+}

@@ -1,0 +1,6 @@
+include 'eproject-eureka-boot'
+
+rootProject.name = "${projectName}"
+project(':eproject-eureka-boot').projectDir = new File('boot')
+
+
