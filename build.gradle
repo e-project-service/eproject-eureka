@@ -78,12 +78,19 @@ project(':eproject-eureka-boot') {
 
         //Boot
         runtimeOnly 'org.springframework.boot:spring-boot-devtools'
+        implementation 'org.springframework.boot:spring-boot-starter-web'
+        implementation 'org.springframework.boot:spring-boot-starter-security'
+        implementation 'org.springframework.boot:spring-boot-starter-oauth2-resource-server'
 
         //BootAdmin
         implementation "de.codecentric:spring-boot-admin-starter-client:${springBootAdminVersion}"
 
         //Jolokia
         implementation 'org.jolokia:jolokia-core'
+
+        //security-oauth2-client-authentication
+        compile 'com.github.xiaoyao9184.spring-security-expansion:security-oauth2-client-authentication:master-SNAPSHOT'
+
 
         //TEST
         testImplementation group: 'junit', name: 'junit', version: '4.11'
